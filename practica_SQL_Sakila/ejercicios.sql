@@ -70,22 +70,56 @@ ORDER BY a.first_name ASC;
 #b. Miembros del staff que son manager, en alguna tienda.[first_name,active,store,address,address2]Rows=2
 SELECT s.first_name,s.active,s.store_id,a.address,a.address2
 FROM staff s INNER JOIN store st ON s.staff_id=st.manager_staff_id
-			INNER JOIN address a ON st.address_id=a.address_id
+			INNER JOIN address a ON st.address_id=a.address_id;
 
 #6. Cantidad de Dinero recaudado por las ventas en el tercer trimestre del año 2005
 #(formato de fecha yyyy/mm/dd hh/mm/ss) [Monto]Rows=1
-
-
+SELECT sum(amount) as monto
+FROM payment 
+WHERE year(payment_date)=2005 AND month(payment_date) BETWEEN 7 AND 12;
 
 #7. Películas que han sido alquiladas alguna vez [Title]Rows=958
+SELECT DISTINCT (f.title)
+FROM film f INNER JOIN inventory i ON f.film_id=i.film_id
+			INNER JOIN rental r ON i.inventory_id=r.inventory_id;
+
 #8. Clientes No Activos ordenados por Ciudad alfabéticamente [First_name,City]Rows= 15
+SELECT c.first_name, ci.city
+FROM customer c INNER JOIN address a ON c.address_id=a.address_id
+				INNER JOIN city ci ON a.city_id=ci.city_id
+WHERE c.active = false
+ORDER BY c.first_name;
+
 #9. Las 4 películas más alquiladas en orden Descendente. [Cantidad_de_alquileres,Title]Rows=4
+SELECT f.title,count(r.rental_id) cantidadAlquiladas
+FROM film f INNER JOIN inventory i ON f.film_id=i.film_id
+			INNER JOIN rental r ON i.inventory_id=r.inventory_id
+GROUP BY f.film_id
+ORDER BY cantidadAlquiladas DESC LIMIT 4;
+
 #10. Película que nunca ha sido alquilada [Film_id,Title]Rows=42
+SELECT film_id,title
+FROM film
+WHERE film_id NOT IN(SELECT DISTINCT f.film_id
+FROM film f INNER JOIN inventory i ON f.film_id=i.film_id
+			INNER JOIN rental r ON i.inventory_id=r.inventory_id);
+
 #11. Cantidad de copias de cada película Por película Ordenadas en orden de cantidad de 
 #películas de mayor a menor. [Film_id,Cantidad]Rows=958
+SELECT f.film_id, count(f.film_id) AS cantidad
+FROM film f INNER JOIN inventory i ON f.film_id=i.film_id
+GROUP BY f.film_id
+ORDER BY cantidad DESC;
+
 #12. Películas que fueron devueltas Fuera de fecha.(Películas que han pagadorecargo) 
 #.[Title, Rental_date, rental_duration, 
 #payment_date ,Return_date, amount,replacement_cost, inventori_id]Rows=48
+select f.rental_duration, r.rental_date, date_add(r.rental_date,intervaL f.rental_duration day) as rental_limit, 
+		coalesce(r.return_date,now()) as return_date, datediff(date_add(r.rental_date,intervaL f.rental_duration day), coalesce(r.return_date,now()))*-1 
+from film f inner join inventory i on f.film_id=i.film_id
+			inner join rental r on i.inventory_id=r.inventory_id
+where datediff(date_add(r.rental_date,intervaL f.rental_duration day), coalesce(r.return_date,now())) <0;
+
 #13. Cantidad de películas por categoría indicando su precio promedio. [Name,Promedio]Rows=16
 #14. Lista de precios conteniendo 4 columnas: 1) precio del alquiler 2) precio del alquiler
 #+ 10% del mismo por retraso de 1 DIA 2) precio del alquiler + 20% del mismo por
