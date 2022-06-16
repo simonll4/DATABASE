@@ -10,7 +10,8 @@ WITH RECURSIVE  cte_informatica1 AS (
 								INNER JOIN Semestre s ON m.idSemestre=s.idSemestre
     ) 
     SELECT *
-    FROM cte_informatica1 ;
+    FROM cte_informatica1
+    ORDER BY semestre;
     
 #carga horaria total de las materias correlativas con info 1
 WITH RECURSIVE  cte_informatica1 AS (
@@ -23,6 +24,21 @@ WITH RECURSIVE  cte_informatica1 AS (
     ) 
     SELECT SUM(cargaHoraria) AS horasDeCursado
     FROM cte_informatica1 ;
+    
+#correlativas con ingenieria web 1
+WITH RECURSIVE
+		cte_ingWeb1 AS (
+        SELECT m.idMateria, m.nombre, m.idCorrelativa, m.idCorrelativa2, s.semestre
+        FROM Materia m INNER JOIN Semestre s ON m.idSemestre=s.idSemestre
+        WHERE m.idMateria=5
+        UNION
+        SELECT m.idMateria, m.nombre, m.idCorrelativa, m.idCorrelativa2, s.semestre
+        FROM cte_ingWeb1 a INNER JOIN Materia m ON a.idMateria=m.idCorrelativa OR a.idMateria=m.idCorrelativa2
+							INNER JOIN Semestre s ON m.idSemestre=s.idSemestre
+        )SELECT * FROM cte_ingWeb1
+        ORDER BY semestre;
+        
+
     
 #correlativas con redes 1
 WITH RECURSIVE 
