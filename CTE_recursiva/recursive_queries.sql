@@ -3,13 +3,14 @@ WITH RECURSIVE cte_ingenieriaWeb1 AS (
 	SELECT m.idMateria,m.materia, s.semestre, c.idMateria1
     FROM Materia m INNER JOIN Correlativa c ON m.idMateria=c.idMateria
 					INNER JOIN Semestre s ON m.idSemestre=s.idSemestre
-	WHERE m.idMateria=7
+	WHERE m.idMateria=5
     UNION
     SELECT m.idMateria,m.materia, s.semestre, c.idMateria1
     FROM cte_ingenieriaWeb1 a INNER JOIN Correlativa c ON a.idMateria=c.idMateria1
 								INNER JOIN Materia m ON c.idMateria=m.idMateria
 								INNER JOIN Semestre s ON m.idSemestre=s.idSemestre
-) SELECT * FROM cte_ingenieriaWeb1; 
+) SELECT * FROM cte_ingenieriaWeb1
+ORDER BY idMateria; 
 
 #correlativas con redes 1
 WITH RECURSIVE cte_redes1 AS (
